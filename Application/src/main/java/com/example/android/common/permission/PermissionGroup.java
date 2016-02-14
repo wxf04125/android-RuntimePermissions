@@ -22,7 +22,14 @@ public abstract class PermissionGroup {
 
     public PermissionGroup(Activity activity) {
         mActivity = activity;
+    }
+
+    /**
+     * 所需要的权限是否都授权了
+     */
+    public boolean isAllGranted() {
         mUnGranted = getUnGranted(getPermissions());
+        return mUnGranted.length == 0;
     }
 
     /**
@@ -43,13 +50,6 @@ public abstract class PermissionGroup {
     private boolean checkSelfPermission(String permission) {
         return ContextCompat.checkSelfPermission(mActivity, permission) ==
                 PackageManager.PERMISSION_GRANTED;
-    }
-
-    /**
-     * 所需要的权限是否都授权了
-     */
-    public boolean isAllGranted() {
-        return mUnGranted.length == 0;
     }
 
     /**

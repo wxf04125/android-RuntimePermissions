@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -261,55 +260,6 @@ public class MainActivity extends ProxyActivity {
                 .commit();
     }
 
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CAMERA) {
-            // BEGIN_INCLUDE(permission_result)
-            // Received permission result for camera permission.
-            Log.i(TAG, "Received response for Camera permission request.");
-
-            // Check if the only required permission has been granted
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Camera permission has been granted, preview can be displayed
-                Log.i(TAG, "CAMERA permission has now been granted. Showing preview.");
-                Snackbar.make(mLayout, R.string.permision_available_camera,
-                        Snackbar.LENGTH_SHORT).show();
-            } else {
-                Log.i(TAG, "CAMERA permission was NOT granted.");
-                Snackbar.make(mLayout, R.string.permissions_not_granted,
-                        Snackbar.LENGTH_SHORT).show();
-
-            }
-            // END_INCLUDE(permission_result)
-
-            //        } else if (requestCode == REQUEST_CONTACTS) {
-            //            Log.i(TAG, "Received response for contact permissions request.");
-            //
-            //            // We have requested multiple permissions for contacts, so all of them need to be
-            //            // checked.
-            //            if (PermissionUtil.verifyPermissions(grantResults)) {
-            //                // All required permissions have been granted, display contacts fragment.
-            //                Snackbar.make(mLayout, R.string.permision_available_contacts,
-            //                        Snackbar.LENGTH_SHORT)
-            //                        .show();
-            //            } else {
-            //                Log.i(TAG, "Contacts permissions were NOT granted.");
-            //                Snackbar.make(mLayout, R.string.permissions_not_granted,
-            //                        Snackbar.LENGTH_SHORT)
-            //                        .show();
-            //            }
-            //
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
     /* Note: Methods and definitions below are only used to provide the UI for this sample and are
     not relevant for the execution of the runtime permissions API. */
 
@@ -421,7 +371,16 @@ public class MainActivity extends ProxyActivity {
                 // Contact permissions have been granted. Show the contacts fragment.
                 Log.i(TAG,
                         "Contact permissions have already been granted. Displaying contact details.");
-                showContactDetails();
+                // Display a SnackBar with an explanation and a button to trigger the request.
+                Snackbar.make(mLayout, R.string.permision_available_contacts,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                showContactDetails();
+                            }
+                        })
+                        .show();
             }
         };
 
