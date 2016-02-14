@@ -16,13 +16,6 @@
 
 package com.example.android.system.runtimepermissions;
 
-import com.example.android.common.logger.Log;
-import com.example.android.common.logger.LogFragment;
-import com.example.android.common.logger.LogWrapper;
-import com.example.android.common.logger.MessageOnlyLogFilter;
-import com.example.android.system.runtimepermissions.camera.CameraPreviewFragment;
-import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -37,7 +30,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ViewAnimator;
 
-import common.activities.SampleActivityBase;
+import com.example.android.common.logger.Log;
+import com.example.android.common.logger.LogFragment;
+import com.example.android.common.logger.LogWrapper;
+import com.example.android.common.logger.MessageOnlyLogFilter;
+import com.example.android.common.permission.ContactGroup;
+import com.example.android.common.proxy.PermissionProxy;
+import com.example.android.common.proxy.ProxyActivity;
+import com.example.android.system.runtimepermissions.camera.CameraPreviewFragment;
+import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
 
 /**
  * Launcher Activity that demonstrates the use of runtime permissions for Android M.
@@ -80,8 +81,7 @@ import common.activities.SampleActivityBase;
  * <p>
  * (This class is based on the MainActivity used in the SimpleFragment sample template.)
  */
-public class MainActivity extends SampleActivityBase
-        implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends ProxyActivity {
 
     public static final String TAG = "MainActivity";
 
@@ -93,7 +93,7 @@ public class MainActivity extends SampleActivityBase
     /**
      * Id to identify a contacts permission request.
      */
-    private static final int REQUEST_CONTACTS = 1;
+    public static final int REQUEST_CONTACTS = 1;
 
     /**
      * Permissions required to read and write contacts. Used by the {@link ContactsFragment}.
@@ -170,11 +170,16 @@ public class MainActivity extends SampleActivityBase
         // END_INCLUDE(camera_permission_request)
     }
 
+    public void showContacts(View v) {
+        validatePermission();
+    }
+
+
     /**
      * Called when the 'show camera' button is clicked.
      * Callback is defined in resource layout definition.
      */
-    public void showContacts(View v) {
+    public void showContactsOld(View v) {
         Log.i(TAG, "Show contacts button pressed. Checking permissions.");
 
         // Verify that all required contact permissions have been granted.
@@ -262,8 +267,8 @@ public class MainActivity extends SampleActivityBase
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
-
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CAMERA) {
             // BEGIN_INCLUDE(permission_result)
             // Received permission result for camera permission.
@@ -283,23 +288,23 @@ public class MainActivity extends SampleActivityBase
             }
             // END_INCLUDE(permission_result)
 
-        } else if (requestCode == REQUEST_CONTACTS) {
-            Log.i(TAG, "Received response for contact permissions request.");
-
-            // We have requested multiple permissions for contacts, so all of them need to be
-            // checked.
-            if (PermissionUtil.verifyPermissions(grantResults)) {
-                // All required permissions have been granted, display contacts fragment.
-                Snackbar.make(mLayout, R.string.permision_available_contacts,
-                        Snackbar.LENGTH_SHORT)
-                        .show();
-            } else {
-                Log.i(TAG, "Contacts permissions were NOT granted.");
-                Snackbar.make(mLayout, R.string.permissions_not_granted,
-                        Snackbar.LENGTH_SHORT)
-                        .show();
-            }
-
+            //        } else if (requestCode == REQUEST_CONTACTS) {
+            //            Log.i(TAG, "Received response for contact permissions request.");
+            //
+            //            // We have requested multiple permissions for contacts, so all of them need to be
+            //            // checked.
+            //            if (PermissionUtil.verifyPermissions(grantResults)) {
+            //                // All required permissions have been granted, display contacts fragment.
+            //                Snackbar.make(mLayout, R.string.permision_available_contacts,
+            //                        Snackbar.LENGTH_SHORT)
+            //                        .show();
+            //            } else {
+            //                Log.i(TAG, "Contacts permissions were NOT granted.");
+            //                Snackbar.make(mLayout, R.string.permissions_not_granted,
+            //                        Snackbar.LENGTH_SHORT)
+            //                        .show();
+            //            }
+            //
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -341,7 +346,9 @@ public class MainActivity extends SampleActivityBase
         return super.onOptionsItemSelected(item);
     }
 
-    /** Create a chain of targets that will receive log data */
+    /**
+     * Create a chain of targets that will receive log data
+     */
     @Override
     public void initializeLogging() {
         // Wraps Android's native log framework.
@@ -379,5 +386,45 @@ public class MainActivity extends SampleActivityBase
         // This method sets up our custom logger, which will print all log messages to the device
         // screen, as well as to adb logcat.
         initializeLogging();
+
+        PermissionProxy permissionProxy = new PermissionProxy(this, new ContactGroup(this)) {
+            @Override
+            public void showRationale() {
+                // Provide an additional rationale to the user if the permission was not granted
+                // and the user would benefit from additional context for the use of the permission.
+                // For example, if the request has been denied previously.
+                Log.i(TAG,
+                        "Displaying contacts permission rationale to provide additional context.");
+
+                // Display a SnackBar with an explanation and a button to trigger the request.
+                Snackbar.make(mLayout, R.string.permission_contacts_rationale,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                requestPermissions();
+                            }
+                        })
+                        .show();
+            }
+
+            @Override
+            public void onDeny() {
+                Log.i(TAG, "Contacts permissions were NOT granted.");
+                Snackbar.make(mLayout, R.string.permissions_not_granted,
+                        Snackbar.LENGTH_SHORT)
+                        .show();
+            }
+
+            @Override
+            protected void onValidated() {
+                // Contact permissions have been granted. Show the contacts fragment.
+                Log.i(TAG,
+                        "Contact permissions have already been granted. Displaying contact details.");
+                showContactDetails();
+            }
+        };
+
+        addProxy(permissionProxy);
     }
 }
