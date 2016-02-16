@@ -1,4 +1,4 @@
-package com.example.android.common.permission;
+package com.example.android.common.permission.group;
 
 import android.Manifest.permission;
 import android.app.Activity;

@@ -1,4 +1,4 @@
-package com.example.android.common.permission;
+package com.example.android.common.permission.group;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;
@@ -8,6 +8,10 @@ import android.support.v4.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 在正常的获取用户授权过程中，这个类的方法是按照顺序来调用的
+ * isAllGranted --> shouldShowRationale --> request --> verify
+ */
 public abstract class PermissionGroup {
 
     public static final int REQUEST_LOCATION = 0;
@@ -16,12 +20,12 @@ public abstract class PermissionGroup {
 
     private String[] mUnGranted;
 
-    public abstract int getRequestCode();
-
-    public abstract String[] getPermissions();
-
     public PermissionGroup(Activity activity) {
         mActivity = activity;
+    }
+
+    public Activity getActivity(){
+        return mActivity;
     }
 
     /**
@@ -77,7 +81,7 @@ public abstract class PermissionGroup {
      *
      * @see Activity#onRequestPermissionsResult(int, String[], int[])
      */
-    public static boolean verifyPermissions(int[] grantResults) {
+    public static boolean verify(int[] grantResults) {
         // At least one result must be checked.
         if (grantResults.length < 1) {
             return false;
@@ -91,4 +95,8 @@ public abstract class PermissionGroup {
         }
         return true;
     }
+
+    public abstract int getRequestCode();
+
+    public abstract String[] getPermissions();
 }

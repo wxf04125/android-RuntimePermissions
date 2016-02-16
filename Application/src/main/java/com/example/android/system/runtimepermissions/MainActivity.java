@@ -33,9 +33,9 @@ import com.example.android.common.logger.Log;
 import com.example.android.common.logger.LogFragment;
 import com.example.android.common.logger.LogWrapper;
 import com.example.android.common.logger.MessageOnlyLogFilter;
-import com.example.android.common.permission.ContactGroup;
-import com.example.android.common.proxy.PermissionProxy;
-import com.example.android.common.proxy.ProxyActivity;
+import com.example.android.common.permission.PermissionProxy;
+import com.example.android.common.permission.PermissionProxyActivity;
+import com.example.android.common.permission.group.ContactGroup;
 import com.example.android.system.runtimepermissions.camera.CameraPreviewFragment;
 import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
 
@@ -43,7 +43,7 @@ import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
  * Launcher Activity that demonstrates the use of runtime permissions for Android M.
  * It contains a summary sample description, sample log and a Fragment that calls callbacks on this
  * Activity to illustrate parts of the runtime permissions API.
- * <p>
+ * <p/>
  * This Activity requests permissions to access the camera ({@link android.Manifest.permission#CAMERA})
  * when the 'Show Camera' button is clicked to display the camera preview.
  * Contacts permissions (({@link android.Manifest.permission#READ_CONTACTS} and ({@link
@@ -59,17 +59,17 @@ import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
  * in
  * a callback to the {@link android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback}
  * interface.
- * <p>
+ * <p/>
  * Before requesting permissions, {@link ActivityCompat#shouldShowRequestPermissionRationale(Activity,
  * String)}
  * should be called to provide the user with additional context for the use of permissions if they
  * have been denied previously.
- * <p>
+ * <p/>
  * If this sample is executed on a device running a platform version below M, all permissions
  * declared
  * in the Android manifest file are always granted at install time and cannot be requested at run
  * time.
- * <p>
+ * <p/>
  * This sample targets the M platform and must therefore request permissions at runtime. Change the
  * targetSdk in the file 'Application/build.gradle' to 22 to run the application in compatibility
  * mode.
@@ -77,10 +77,10 @@ import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
  * APIs provide compatibility data.
  * For example the camera cannot be opened or an empty list of contacts is returned. No special
  * action is required in this case.
- * <p>
+ * <p/>
  * (This class is based on the MainActivity used in the SimpleFragment sample template.)
  */
-public class MainActivity extends ProxyActivity {
+public class MainActivity extends PermissionProxyActivity {
 
     public static final String TAG = "MainActivity";
 
@@ -170,7 +170,52 @@ public class MainActivity extends ProxyActivity {
     }
 
     public void showContacts(View v) {
-        validatePermission();
+        requestPermissions(new PermissionProxy(new ContactGroup(this)) {
+            @Override
+            public void showRationale() {
+                // Provide an additional rationale to the user if the permission was not granted
+                // and the user would benefit from additional context for the use of the permission.
+                // For example, if the request has been denied previously.
+                Log.i(TAG,
+                        "Displaying contacts permission rationale to provide additional context.");
+
+                // Display a SnackBar with an explanation and a button to trigger the request.
+                Snackbar.make(mLayout, R.string.permission_contacts_rationale,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                requestPermissions();
+                            }
+                        })
+                        .show();
+            }
+
+            @Override
+            public void onDenied() {
+                Log.i(TAG, "Contacts permissions were NOT granted.");
+                Snackbar.make(mLayout, R.string.permissions_not_granted,
+                        Snackbar.LENGTH_SHORT)
+                        .show();
+            }
+
+            @Override
+            protected void onGranted() {
+                // Contact permissions have been granted. Show the contacts fragment.
+                Log.i(TAG,
+                        "Contact permissions have already been granted. Displaying contact details.");
+                // Display a SnackBar with an explanation and a button to trigger the request.
+                Snackbar.make(mLayout, R.string.permision_available_contacts,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                showContactDetails();
+                            }
+                        })
+                        .show();
+            }
+        });
     }
 
 
@@ -336,54 +381,5 @@ public class MainActivity extends ProxyActivity {
         // This method sets up our custom logger, which will print all log messages to the device
         // screen, as well as to adb logcat.
         initializeLogging();
-
-        PermissionProxy permissionProxy = new PermissionProxy(this, new ContactGroup(this)) {
-            @Override
-            public void showRationale() {
-                // Provide an additional rationale to the user if the permission was not granted
-                // and the user would benefit from additional context for the use of the permission.
-                // For example, if the request has been denied previously.
-                Log.i(TAG,
-                        "Displaying contacts permission rationale to provide additional context.");
-
-                // Display a SnackBar with an explanation and a button to trigger the request.
-                Snackbar.make(mLayout, R.string.permission_contacts_rationale,
-                        Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.ok, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                requestPermissions();
-                            }
-                        })
-                        .show();
-            }
-
-            @Override
-            public void onDeny() {
-                Log.i(TAG, "Contacts permissions were NOT granted.");
-                Snackbar.make(mLayout, R.string.permissions_not_granted,
-                        Snackbar.LENGTH_SHORT)
-                        .show();
-            }
-
-            @Override
-            protected void onValidated() {
-                // Contact permissions have been granted. Show the contacts fragment.
-                Log.i(TAG,
-                        "Contact permissions have already been granted. Displaying contact details.");
-                // Display a SnackBar with an explanation and a button to trigger the request.
-                Snackbar.make(mLayout, R.string.permision_available_contacts,
-                        Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.ok, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                showContactDetails();
-                            }
-                        })
-                        .show();
-            }
-        };
-
-        addProxy(permissionProxy);
     }
 }
