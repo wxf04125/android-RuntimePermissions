@@ -5,7 +5,7 @@ import android.app.Activity;
 
 import com.example.android.system.runtimepermissions.MainActivity;
 
-public class ContactGroup extends PermissionGroup {
+public abstract class ContactGroup extends PermissionGroup {
 
     public ContactGroup(Activity activity) {
         super(activity);

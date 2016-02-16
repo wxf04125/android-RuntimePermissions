@@ -33,7 +33,6 @@ import com.example.android.common.logger.Log;
 import com.example.android.common.logger.LogFragment;
 import com.example.android.common.logger.LogWrapper;
 import com.example.android.common.logger.MessageOnlyLogFilter;
-import com.example.android.common.permission.PermissionProxy;
 import com.example.android.common.permission.PermissionProxyActivity;
 import com.example.android.common.permission.group.ContactGroup;
 import com.example.android.system.runtimepermissions.camera.CameraPreviewFragment;
@@ -170,7 +169,7 @@ public class MainActivity extends PermissionProxyActivity {
     }
 
     public void showContacts(View v) {
-        requestPermissions(new PermissionProxy(new ContactGroup(this)) {
+        requestPermissions(new ContactGroup(this) {
             @Override
             public void showRationale() {
                 // Provide an additional rationale to the user if the permission was not granted
@@ -185,7 +184,7 @@ public class MainActivity extends PermissionProxyActivity {
                         .setAction(R.string.ok, new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                requestPermissions();
+                                request();
                             }
                         })
                         .show();
@@ -200,7 +199,7 @@ public class MainActivity extends PermissionProxyActivity {
             }
 
             @Override
-            protected void onGranted() {
+            public void onGranted() {
                 // Contact permissions have been granted. Show the contacts fragment.
                 Log.i(TAG,
                         "Contact permissions have already been granted. Displaying contact details.");

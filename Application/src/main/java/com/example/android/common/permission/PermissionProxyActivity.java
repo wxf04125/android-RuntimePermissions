@@ -2,24 +2,42 @@ package com.example.android.common.permission;
 
 import android.support.annotation.NonNull;
 
+import com.example.android.common.permission.group.PermissionGroup;
+
 import common.activities.SampleActivityBase;
 
-public class PermissionProxyActivity extends SampleActivityBase {
+public abstract class PermissionProxyActivity extends SampleActivityBase {
 
-    private PermissionProxy mPermissionProxy;
+    private PermissionGroup mPermissionGroup;
 
-    public void requestPermissions(PermissionProxy proxy) {
-        mPermissionProxy = proxy;
-        if (null != mPermissionProxy) {
-            mPermissionProxy.validate();
+    public void requestPermissions(PermissionGroup group) {
+        mPermissionGroup = group;
+        if (null != group) {
+            validate();
+        }
+    }
+
+    public void validate() {
+        if (mPermissionGroup.isAllGranted()) {
+            mPermissionGroup.onGranted();
+        } else {
+            if (mPermissionGroup.shouldShowRationale()) {
+                mPermissionGroup.showRationale();
+            } else {
+                mPermissionGroup.request();
+            }
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (null != mPermissionProxy) {
-            mPermissionProxy.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == mPermissionGroup.getRequestCode()) {
+            if (PermissionGroup.verify(grantResults)) {
+                mPermissionGroup.onGranted();
+            } else {
+                mPermissionGroup.onDenied();
+            }
         }
     }
 }
