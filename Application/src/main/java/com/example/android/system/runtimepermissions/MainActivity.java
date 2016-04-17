@@ -33,8 +33,8 @@ import com.example.android.common.logger.Log;
 import com.example.android.common.logger.LogFragment;
 import com.example.android.common.logger.LogWrapper;
 import com.example.android.common.logger.MessageOnlyLogFilter;
-import com.example.android.common.permission.PermissionProxyActivity;
-import com.example.android.common.permission.group.ContactGroup;
+import com.example.android.system.runtimepermissions.permission.ContactGroup;
+import com.example.android.system.runtimepermissions.permission.core.PermissionProxyActivity;
 import com.example.android.system.runtimepermissions.camera.CameraPreviewFragment;
 import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
 
@@ -169,50 +169,30 @@ public class MainActivity extends PermissionProxyActivity {
     }
 
     public void showContacts(View v) {
-        requestPermissions(new ContactGroup(this) {
+        requestPermissions(new ContactGroup() {
             @Override
-            public void showRationale() {
-                // Provide an additional rationale to the user if the permission was not granted
-                // and the user would benefit from additional context for the use of the permission.
-                // For example, if the request has been denied previously.
-                Log.i(TAG,
-                        "Displaying contacts permission rationale to provide additional context.");
-
-                // Display a SnackBar with an explanation and a button to trigger the request.
-                Snackbar.make(mLayout, R.string.permission_contacts_rationale,
-                        Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.ok, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                request();
-                            }
-                        })
-                        .show();
-            }
-
-            @Override
-            public void onDenied() {
-                Log.i(TAG, "Contacts permissions were NOT granted.");
-                Snackbar.make(mLayout, R.string.permissions_not_granted,
-                        Snackbar.LENGTH_SHORT)
-                        .show();
+            protected int[] getSnackbarResources() {
+                return new int[]{R.id.sample_main_layout, R.string.permission_contacts_rationale};
             }
 
             @Override
             public void onGranted() {
                 // Contact permissions have been granted. Show the contacts fragment.
-                Log.i(TAG,
-                        "Contact permissions have already been granted. Displaying contact details.");
+                Log.i(TAG, "Contact permissions have already been granted. Displaying contact details.");
                 // Display a SnackBar with an explanation and a button to trigger the request.
-                Snackbar.make(mLayout, R.string.permision_available_contacts,
-                        Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(mLayout, R.string.permision_available_contacts, Snackbar.LENGTH_INDEFINITE)
                         .setAction(R.string.ok, new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 showContactDetails();
                             }
-                        })
-                        .show();
+                        }).show();
+            }
+
+            @Override
+            public void onDenied() {
+                Log.i(TAG, "Contacts permissions were NOT granted.");
+                Snackbar.make(mLayout, R.string.permissions_not_granted, Snackbar.LENGTH_SHORT).show();
             }
         });
     }
