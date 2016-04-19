@@ -13,14 +13,18 @@ import java.util.List;
 /**
  * isAllGranted --> shouldShowRationale --> showRationale --> doRequest --> verify
  */
-public abstract class PermissionGroup implements PermissionGrantInterface {
+public abstract class PermissionGroup implements PermissionGrantCallback{
 
     private static int sBaseCode = 0;
+
+    private PermissionRationale mRationale;
 
     /**
      * 在fragment中只能使用低八位
      */
     private int mRequestCode;
+
+    private String[] mPermissions;
 
     private String[] mUnGranted;
 
@@ -32,11 +36,18 @@ public abstract class PermissionGroup implements PermissionGrantInterface {
         refreshRequestCode();
     }
 
+    protected PermissionGroup(String permission) {
+        mPermissions = new String[]{permission};
+        refreshRequestCode();
+
+
+    }
+
     protected void requestPermissions(Activity activity) {
         mActivity = activity;
         mFragment = null;
         if (isAllGranted(activity)) {
-            onGranted();
+            onChecked();
         } else if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale();
@@ -49,7 +60,7 @@ public abstract class PermissionGroup implements PermissionGrantInterface {
         mActivity = fragment.getActivity();
         mFragment = fragment;
         if (isAllGranted(mActivity)) {
-            onGranted();
+            onChecked();
         } else if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale();
@@ -152,11 +163,36 @@ public abstract class PermissionGroup implements PermissionGrantInterface {
         return true;
     }
 
+    public String[] getPermissions() {
+        return mPermissions;
+    }
+
+    public void showRationale() {
+        if (null == mRationale) {
+            doRequest();
+        } else {
+            mRationale.setPermissionGroup(this);
+            mRationale.showRationale();
+        }
+    }
+
+    public PermissionGroup setupRationale(PermissionRationale rationale) {
+        mRationale = rationale;
+        return this;
+    }
+
     /**
-     * 在这里处理用户拒绝授权的情况，可以在这里提供默认的实现，也可以由子类自己实现
+     * 处理app之前已经获得授权的情况,默认按照授权成功来处理
      */
-    @Override
+    public void onChecked(){
+        onGranted();
+    }
+
+    /**
+     * 处理用户拒绝授权的情况,默认不处理
+     */
     public void onDenied() {
 
     }
+
 }

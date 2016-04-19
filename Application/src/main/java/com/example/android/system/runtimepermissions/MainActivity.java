@@ -33,10 +33,13 @@ import com.example.android.common.logger.Log;
 import com.example.android.common.logger.LogFragment;
 import com.example.android.common.logger.LogWrapper;
 import com.example.android.common.logger.MessageOnlyLogFilter;
-import com.example.android.system.runtimepermissions.permission.ContactGroup;
-import com.example.android.system.runtimepermissions.permission.core.PermissionProxyActivity;
 import com.example.android.system.runtimepermissions.camera.CameraPreviewFragment;
 import com.example.android.system.runtimepermissions.contacts.ContactsFragment;
+import com.example.android.system.runtimepermissions.permission.core.PermissionGroup;
+import com.example.android.system.runtimepermissions.permission.core.PermissionProxyActivity;
+import com.example.android.system.runtimepermissions.permission.group.ContactGroup;
+import com.example.android.system.runtimepermissions.permission.rationale.DialogRationale;
+import com.example.android.system.runtimepermissions.permission.rationale.SnackBarRationale;
 
 /**
  * Launcher Activity that demonstrates the use of runtime permissions for Android M.
@@ -107,11 +110,31 @@ public class MainActivity extends PermissionProxyActivity {
      */
     private View mLayout;
 
+    public void showCamera(View view){
+        requestPermissions(new PermissionGroup(Manifest.permission.CAMERA) {
+            @Override
+            public void onChecked() {
+                showCameraPreview();
+            }
+
+            @Override
+            public void onGranted() {
+                Snackbar.make(mLayout, R.string.permision_available_camera, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.ok, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                showCameraPreview();
+                            }
+                        }).show();
+            }
+        }.setupRationale(new DialogRationale(R.string.permission_camera_rationale)));
+    }
+
     /**
      * Called when the 'show camera' button is clicked.
      * Callback is defined in resource layout definition.
      */
-    public void showCamera(View view) {
+    public void showCameraOld(View view) {
         Log.i(TAG, "Show camera button pressed. Checking permission.");
         // BEGIN_INCLUDE(camera_permission)
         // Check if the Camera permission is already available.
@@ -171,8 +194,8 @@ public class MainActivity extends PermissionProxyActivity {
     public void showContacts(View v) {
         requestPermissions(new ContactGroup() {
             @Override
-            protected int[] getSnackbarResources() {
-                return new int[]{R.id.sample_main_layout, R.string.permission_contacts_rationale};
+            public void onChecked() {
+                showContactDetails();
             }
 
             @Override
@@ -194,7 +217,7 @@ public class MainActivity extends PermissionProxyActivity {
                 Log.i(TAG, "Contacts permissions were NOT granted.");
                 Snackbar.make(mLayout, R.string.permissions_not_granted, Snackbar.LENGTH_SHORT).show();
             }
-        });
+        }.setupRationale(new SnackBarRationale(R.id.sample_main_layout, R.string.permission_contacts_rationale)));
     }
 
 
@@ -228,6 +251,7 @@ public class MainActivity extends PermissionProxyActivity {
      * If the permission has been denied previously, a SnackBar will prompt the user to grant the
      * permission, otherwise it is requested directly.
      */
+
     private void requestContactsPermissions() {
         // BEGIN_INCLUDE(contacts_permission_request)
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
