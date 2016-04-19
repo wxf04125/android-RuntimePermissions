@@ -10,8 +10,12 @@ public class PermissionProxyActivity extends SampleActivityBase {
 
     public void requestPermissions(PermissionGroup group) {
         if (null != group) {
-            mPermissionGroup = group;
-            mPermissionGroup.requestPermissions(this);
+            if (group.isAllGranted(this)) {
+                group.onChecked();
+            } else if (null == mPermissionGroup){
+                mPermissionGroup = group;
+                mPermissionGroup.requestPermissions(this);
+            }
         }
     }
 
@@ -24,5 +28,7 @@ public class PermissionProxyActivity extends SampleActivityBase {
                 mPermissionGroup.onDenied();
             }
         }
+
+        mPermissionGroup = null;
     }
 }

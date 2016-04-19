@@ -39,16 +39,12 @@ public abstract class PermissionGroup implements PermissionGrantCallback{
     protected PermissionGroup(String permission) {
         mPermissions = new String[]{permission};
         refreshRequestCode();
-
-
     }
 
     protected void requestPermissions(Activity activity) {
         mActivity = activity;
         mFragment = null;
-        if (isAllGranted(activity)) {
-            onChecked();
-        } else if (shouldShowRationale()) {
+        if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale();
         } else {
@@ -59,9 +55,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback{
     protected void requestPermissions(Fragment fragment) {
         mActivity = fragment.getActivity();
         mFragment = fragment;
-        if (isAllGranted(mActivity)) {
-            onChecked();
-        } else if (shouldShowRationale()) {
+        if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale();
         } else {
