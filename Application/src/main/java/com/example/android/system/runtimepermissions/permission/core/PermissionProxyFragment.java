@@ -9,12 +9,8 @@ public class PermissionProxyFragment extends Fragment {
 
     public void requestPermissions(PermissionGroup group) {
         if (null != group) {
-            if (group.isAllGranted(this.getActivity())) {
-                group.onChecked();
-            } else if (null == mPermissionGroup) {
-                mPermissionGroup = group;
-                mPermissionGroup.requestPermissions(this);
-            }
+            mPermissionGroup = group;
+            mPermissionGroup.requestPermissions(this);
         }
     }
 
@@ -27,7 +23,5 @@ public class PermissionProxyFragment extends Fragment {
                 mPermissionGroup.onDenied();
             }
         }
-
-        mPermissionGroup = null;
     }
 }
