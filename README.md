@@ -1,4 +1,3 @@
-
 Android RuntimePermissions Sample
 ===================================
 
@@ -32,7 +31,7 @@ Pre-requisites
 --------------
 
 - Android SDK v23
-- Android Build Tools v23.0.1
+- Android Build Tools v23.0.3
 - Android Support Repository
 
 Screenshots
