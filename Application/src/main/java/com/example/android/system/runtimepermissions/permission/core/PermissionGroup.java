@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * isAllGranted --> shouldShowRationale --> showRationale --> doRequest --> verify
  */
-public abstract class PermissionGroup implements PermissionGrantCallback, Parcelable{
+public abstract class PermissionGroup implements PermissionGrantCallback, Parcelable {
 
     private static int sBaseCode = 0;
 
@@ -48,9 +48,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
     protected void requestPermissions(Activity activity) {
         mActivity = activity;
         mFragment = null;
-        if (isAllGranted(activity)) {
-            onChecked();
-        } else if (shouldShowRationale()) {
+        if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale();
         } else {
@@ -61,9 +59,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
     protected void requestPermissions(Fragment fragment) {
         mActivity = fragment.getActivity();
         mFragment = fragment;
-        if (isAllGranted(mActivity)) {
-            onChecked();
-        } else if (shouldShowRationale()) {
+        if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale();
         } else {
@@ -186,7 +182,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
     /**
      * 处理app之前已经获得授权的情况,默认按照授权成功来处理
      */
-    public void onChecked(){
+    public void onChecked() {
         onGranted();
     }
 

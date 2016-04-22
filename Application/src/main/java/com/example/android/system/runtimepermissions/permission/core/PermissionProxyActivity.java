@@ -13,10 +13,14 @@ public class PermissionProxyActivity extends SampleActivityBase {
 
     public void requestPermissions(PermissionGroup group) {
         if (null != group) {
-            if (!mPermissionGroups.contains(group)) {
-                mPermissionGroups.add(group);
+            if (group.isAllGranted(this)) {
+                group.onChecked();
+            } else {
+                if (!mPermissionGroups.contains(group)) {
+                    mPermissionGroups.add(group);
+                }
+                group.requestPermissions(this);
             }
-            group.requestPermissions(this);
         }
     }
 
@@ -24,12 +28,14 @@ public class PermissionProxyActivity extends SampleActivityBase {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (null != mPermissionGroups && mPermissionGroups.size() > 0) {
             for (PermissionGroup permissionGroup : mPermissionGroups) {
-                if (permissionGroup.getRequestCode() == requestCode)
+                if (permissionGroup.getRequestCode() == requestCode) {
                     if (PermissionGroup.verify(grantResults)) {
                         permissionGroup.onGranted();
                     } else {
                         permissionGroup.onDenied();
                     }
+                    mPermissionGroups.remove(permissionGroup);
+                }
             }
         }
     }
