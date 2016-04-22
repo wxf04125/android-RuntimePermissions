@@ -7,13 +7,14 @@ import android.app.Activity;
  */
 public abstract class PermissionRationale {
 
-    protected Activity mActivity;
-
     protected PermissionGroup mPermissionGroup;
 
     public void setPermissionGroup(PermissionGroup permissionGroup){
         mPermissionGroup = permissionGroup;
-        mActivity = mPermissionGroup.mActivity;
+    }
+
+    protected Activity getActivity(){
+        return mPermissionGroup.mActivity;
     }
 
     public abstract void showRationale();

@@ -18,7 +18,7 @@ public class DialogRationale extends PermissionRationale {
 
     @Override
     public void showRationale() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(mStringId);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

@@ -3,10 +3,7 @@ package com.example.android.system.runtimepermissions.permission.core;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 
 import java.util.ArrayList;
@@ -15,56 +12,62 @@ import java.util.List;
 /**
  * isAllGranted --> shouldShowRationale --> showRationale --> doRequest --> verify
  */
-public abstract class PermissionGroup implements PermissionGrantCallback, Parcelable {
+public abstract class PermissionGroup implements PermissionGrantCallback {
 
     private static int sBaseCode = 0;
-
-    private PermissionRationale mRationale;
 
     /**
      * 在fragment中只能使用低八位
      */
     private int mRequestCode;
 
+    protected Activity mActivity;
+
+    private PermissionProxyFragment mFragment;
+
     private String[] mPermissions;
 
     private String[] mUnGranted;
 
-    protected Activity mActivity;
+    private PermissionRationale mRationale;
 
-    private Fragment mFragment;
-
-    protected PermissionGroup() {
-        refreshRequestCode();
-    }
-
-    protected PermissionGroup(String permission) {
-        mPermissions = new String[]{permission};
-        refreshRequestCode();
-
-
-    }
-
-    protected void requestPermissions(Activity activity) {
+    protected PermissionGroup(PermissionProxyActivity activity) {
         mActivity = activity;
         mFragment = null;
-        if (shouldShowRationale()) {
-            // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
-            showRationale();
-        } else {
-            requestPermissionFromActivity();
-        }
+        refreshRequestCode();
     }
 
-    protected void requestPermissions(Fragment fragment) {
-        mActivity = fragment.getActivity();
+    protected PermissionGroup(PermissionProxyActivity activity, String... permissions) {
+        this(activity);
+        mPermissions = permissions;
+    }
+
+    protected PermissionGroup(PermissionProxyFragment fragment) {
         mFragment = fragment;
-        if (shouldShowRationale()) {
-            // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
-            showRationale();
-        } else {
-            requestPermissionFromFragment();
+        mActivity = fragment.getActivity();
+        refreshRequestCode();
+    }
+
+    protected PermissionGroup(PermissionProxyFragment fragment, String... permissions) {
+        this(fragment);
+        mPermissions = permissions;
+    }
+
+    /**
+     * 保证requestCode的值在0-255之间
+     */
+    private void refreshRequestCode() {
+        if (sBaseCode > 0xff) {
+            sBaseCode = 0;
         }
+
+        mRequestCode = sBaseCode++;
+    }
+
+    public PermissionGroup setupRationale(PermissionRationale rationale) {
+        mRationale = rationale;
+        mRationale.setPermissionGroup(this);
+        return this;
     }
 
     /**
@@ -94,10 +97,32 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
         return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
+    protected String[] getPermissions() {
+        return mPermissions;
+    }
+
+    /**
+     * 处理app之前已经获得授权的情况,默认按照授权成功来处理
+     */
+    public void onChecked() {
+        onGranted();
+    }
+
+    public void requestPermissions() {
+        if (isAllGranted(mActivity)) {
+            onChecked();
+        } else if (shouldShowRationale()) {
+            // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
+            showRationale();
+        } else {
+            doRequest();
+        }
+    }
+
     /**
      * 是否需要显示原因，方便用户理解为什么需要这些权限
      */
-    boolean shouldShowRationale() {
+    private boolean shouldShowRationale() {
         for (String permission : mUnGranted) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, permission)) {
                 return true;
@@ -106,13 +131,23 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
         return false;
     }
 
+    private void showRationale() {
+        if (null == mRationale) {
+            doRequest();
+        } else {
+            mRationale.showRationale();
+        }
+    }
+
     /**
      * 请求权限
      */
     public void doRequest() {
         if (null != mFragment) {
+            mFragment.addPermissionGroup(this);
             requestPermissionFromFragment();
         } else {
+            ((PermissionProxyActivity) mActivity).addPermissionGroup(this);
             requestPermissionFromActivity();
         }
     }
@@ -125,19 +160,15 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
         mFragment.requestPermissions(mUnGranted, getRequestCode());
     }
 
-    /**
-     * 保证requestCode的值在0-255之间
-     */
-    private void refreshRequestCode() {
-        if (sBaseCode > 0xff) {
-            sBaseCode = 0;
-        }
-
-        mRequestCode = sBaseCode++;
-    }
-
     int getRequestCode() {
         return mRequestCode;
+    }
+
+    /**
+     * 处理用户拒绝授权的情况,默认不处理
+     */
+    public void onDenied() {
+
     }
 
     /**
@@ -161,45 +192,4 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
         return true;
     }
 
-    public String[] getPermissions() {
-        return mPermissions;
-    }
-
-    public void showRationale() {
-        if (null == mRationale) {
-            doRequest();
-        } else {
-            mRationale.setPermissionGroup(this);
-            mRationale.showRationale();
-        }
-    }
-
-    public PermissionGroup setupRationale(PermissionRationale rationale) {
-        mRationale = rationale;
-        return this;
-    }
-
-    /**
-     * 处理app之前已经获得授权的情况,默认按照授权成功来处理
-     */
-    public void onChecked() {
-        onGranted();
-    }
-
-    /**
-     * 处理用户拒绝授权的情况,默认不处理
-     */
-    public void onDenied() {
-
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-    }
 }

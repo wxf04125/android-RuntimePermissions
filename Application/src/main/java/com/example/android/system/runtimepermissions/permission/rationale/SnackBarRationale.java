@@ -21,7 +21,7 @@ public class SnackBarRationale extends PermissionRationale {
 
     @Override
     public void showRationale() {
-        Snackbar.make(mActivity.findViewById(mViewId), mStringId, Snackbar.LENGTH_INDEFINITE).
+        Snackbar.make(getActivity().findViewById(mViewId), mStringId, Snackbar.LENGTH_INDEFINITE).
                 setAction(android.R.string.ok, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

@@ -19,7 +19,7 @@ public class ToastRationale extends PermissionRationale {
 
     @Override
     public void showRationale() {
-        Toast.makeText(mActivity, mStringId, Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), mStringId, Toast.LENGTH_LONG).show();
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {

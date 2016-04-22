@@ -10,16 +10,9 @@ public class PermissionProxyFragment extends Fragment {
 
     private List<PermissionGroup> mPermissionGroups = new ArrayList<>();
 
-    public void requestPermissions(PermissionGroup group) {
-        if (null != group) {
-            if (group.isAllGranted(getActivity())) {
-                group.onChecked();
-            } else {
-                if (!mPermissionGroups.contains(group)) {
-                    mPermissionGroups.add(group);
-                }
-                group.requestPermissions(this);
-            }
+    public void addPermissionGroup(PermissionGroup group) {
+        if (!mPermissionGroups.contains(group)) {
+            mPermissionGroups.add(group);
         }
     }
 
