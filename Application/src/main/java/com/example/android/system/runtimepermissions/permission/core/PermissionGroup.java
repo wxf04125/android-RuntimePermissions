@@ -3,6 +3,8 @@ package com.example.android.system.runtimepermissions.permission.core;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -13,7 +15,7 @@ import java.util.List;
 /**
  * isAllGranted --> shouldShowRationale --> showRationale --> doRequest --> verify
  */
-public abstract class PermissionGroup implements PermissionGrantCallback{
+public abstract class PermissionGroup implements PermissionGrantCallback, Parcelable{
 
     private static int sBaseCode = 0;
 
@@ -195,4 +197,13 @@ public abstract class PermissionGroup implements PermissionGrantCallback{
 
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
 }
