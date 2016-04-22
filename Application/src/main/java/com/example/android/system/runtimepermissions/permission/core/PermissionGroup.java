@@ -3,19 +3,22 @@ package com.example.android.system.runtimepermissions.permission.core;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * isAllGranted --> shouldShowRationale --> showRationale --> doRequest --> verify
  */
-public abstract class PermissionGroup implements PermissionGrantCallback, Parcelable{
+public abstract class PermissionGroup implements PermissionGrantCallback, Serializable {
+
+    private static final long serialVersionUID = -8869871174764387860L;
+
+    public static final String SAVED_PERMISSION_STATE = "saved_permission_state";
 
     private static int sBaseCode = 0;
 
@@ -30,10 +33,6 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
 
     private String[] mUnGranted;
 
-    protected Activity mActivity;
-
-    private Fragment mFragment;
-
     protected PermissionGroup() {
         refreshRequestCode();
     }
@@ -41,33 +40,28 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
     protected PermissionGroup(String permission) {
         mPermissions = new String[]{permission};
         refreshRequestCode();
-
-
     }
 
     protected void requestPermissions(Activity activity) {
-        mActivity = activity;
-        mFragment = null;
         if (isAllGranted(activity)) {
             onChecked();
-        } else if (shouldShowRationale()) {
+        } else if (shouldShowRationale(activity)) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
-            showRationale();
+            showRationale(activity, null);
         } else {
-            requestPermissionFromActivity();
+            requestFromActivity(activity);
         }
     }
 
     protected void requestPermissions(Fragment fragment) {
-        mActivity = fragment.getActivity();
-        mFragment = fragment;
-        if (isAllGranted(mActivity)) {
+        Activity activity = fragment.getActivity();
+        if (isAllGranted(activity)) {
             onChecked();
-        } else if (shouldShowRationale()) {
+        } else if (shouldShowRationale(activity)) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
-            showRationale();
+            showRationale(fragment.getActivity(), fragment);
         } else {
-            requestPermissionFromFragment();
+            requestFromFragment(fragment);
         }
     }
 
@@ -101,32 +95,21 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
     /**
      * 是否需要显示原因，方便用户理解为什么需要这些权限
      */
-    boolean shouldShowRationale() {
+    boolean shouldShowRationale(Activity activity) {
         for (String permission : mUnGranted) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, permission)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
                 return true;
             }
         }
         return false;
     }
 
-    /**
-     * 请求权限
-     */
-    public void doRequest() {
-        if (null != mFragment) {
-            requestPermissionFromFragment();
-        } else {
-            requestPermissionFromActivity();
-        }
+    private void requestFromActivity(Activity activity) {
+        ActivityCompat.requestPermissions(activity, mUnGranted, getRequestCode());
     }
 
-    private void requestPermissionFromActivity() {
-        ActivityCompat.requestPermissions(mActivity, mUnGranted, getRequestCode());
-    }
-
-    private void requestPermissionFromFragment() {
-        mFragment.requestPermissions(mUnGranted, getRequestCode());
+    private void requestFromFragment(Fragment fragment) {
+        fragment.requestPermissions(mUnGranted, getRequestCode());
     }
 
     /**
@@ -169,12 +152,20 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
         return mPermissions;
     }
 
-    public void showRationale() {
+    public void showRationale(Activity activity, Fragment fragment) {
         if (null == mRationale) {
-            doRequest();
+            doRequest(activity, fragment);
         } else {
             mRationale.setPermissionGroup(this);
-            mRationale.showRationale();
+            mRationale.showRationale(activity, fragment);
+        }
+    }
+
+    public void doRequest(Activity activity, Fragment fragment) {
+        if (null != fragment) {
+            requestFromFragment(fragment);
+        } else if (null != activity) {
+            requestFromActivity(activity);
         }
     }
 
@@ -186,7 +177,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
     /**
      * 处理app之前已经获得授权的情况,默认按照授权成功来处理
      */
-    public void onChecked(){
+    public void onChecked() {
         onGranted();
     }
 
@@ -197,13 +188,4 @@ public abstract class PermissionGroup implements PermissionGrantCallback, Parcel
 
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-    }
 }

@@ -1,6 +1,8 @@
 package com.example.android.system.runtimepermissions.permission.rationale;
 
+import android.app.Activity;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.example.android.system.runtimepermissions.permission.core.PermissionRationale;
@@ -20,12 +22,12 @@ public class SnackBarRationale extends PermissionRationale {
     }
 
     @Override
-    public void showRationale() {
-        Snackbar.make(mActivity.findViewById(mViewId), mStringId, Snackbar.LENGTH_INDEFINITE).
+    public void showRationale(final Activity activity, final Fragment fragment) {
+        Snackbar.make(activity.findViewById(mViewId), mStringId, Snackbar.LENGTH_INDEFINITE).
                 setAction(android.R.string.ok, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mPermissionGroup.doRequest();
+                        mPermissionGroup.doRequest(activity, fragment);
                     }
                 }).show();
     }
