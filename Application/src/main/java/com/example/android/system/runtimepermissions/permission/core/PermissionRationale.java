@@ -14,7 +14,7 @@ public abstract class PermissionRationale {
     }
 
     protected Activity getActivity(){
-        return mPermissionGroup.mActivity;
+        return mPermissionGroup.getActivity();
     }
 
     public abstract void showRationale();

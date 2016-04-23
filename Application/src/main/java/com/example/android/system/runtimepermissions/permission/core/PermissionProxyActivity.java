@@ -1,35 +1,28 @@
 package com.example.android.system.runtimepermissions.permission.core;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.support.v4.app.ActivityCompat;
 
 import common.activities.SampleActivityBase;
 
-public class PermissionProxyActivity extends SampleActivityBase {
+public class PermissionProxyActivity extends SampleActivityBase implements PermissionProxy {
 
-    private List<PermissionGroup> mPermissionGroups = new ArrayList<>();
+    private PermissionGroupContainer mContainer = new PermissionGroupContainer();
 
-    public void addPermissionGroup(PermissionGroup group) {
-        if (!mPermissionGroups.contains(group)) {
-            mPermissionGroups.add(group);
-        }
+    @Override
+    public Activity getActivity() {
+        return this;
+    }
+
+    @Override
+    public void requestPermissions(PermissionGroup group) {
+        mContainer.addPermissions(group);
+        ActivityCompat.requestPermissions(this, group.getUnGranted(), group.getRequestCode());
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (null != mPermissionGroups && mPermissionGroups.size() > 0) {
-            for (PermissionGroup permissionGroup : mPermissionGroups) {
-                if (permissionGroup.getRequestCode() == requestCode) {
-                    if (PermissionGroup.verify(grantResults)) {
-                        permissionGroup.onGranted();
-                    } else {
-                        permissionGroup.onDenied();
-                    }
-                    mPermissionGroups.remove(permissionGroup);
-                }
-            }
-        }
+        mContainer.checkAndRemovePermissions(requestCode, grantResults);
     }
 }

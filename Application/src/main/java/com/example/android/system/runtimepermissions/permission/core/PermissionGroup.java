@@ -21,9 +21,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
      */
     private int mRequestCode;
 
-    protected Activity mActivity;
-
-    private PermissionProxyFragment mFragment;
+    private PermissionProxy mPermissionProxy;
 
     private String[] mPermissions;
 
@@ -31,26 +29,18 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
 
     private PermissionRationale mRationale;
 
-    protected PermissionGroup(PermissionProxyActivity activity) {
-        mActivity = activity;
-        mFragment = null;
+    protected PermissionGroup(PermissionProxy proxy) {
+        mPermissionProxy = proxy;
         refreshRequestCode();
     }
 
-    protected PermissionGroup(PermissionProxyActivity activity, String... permissions) {
-        this(activity);
+    protected PermissionGroup(PermissionProxy proxy, String... permissions) {
+        this(proxy);
         mPermissions = permissions;
     }
 
-    protected PermissionGroup(PermissionProxyFragment fragment) {
-        mFragment = fragment;
-        mActivity = fragment.getActivity();
-        refreshRequestCode();
-    }
-
-    protected PermissionGroup(PermissionProxyFragment fragment, String... permissions) {
-        this(fragment);
-        mPermissions = permissions;
+    public Activity getActivity(){
+        return mPermissionProxy.getActivity();
     }
 
     /**
@@ -81,7 +71,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
     /**
      * 获取未授权的权限
      */
-    private String[] getUnGranted(Context context, String[] permissions) {
+    public String[] getUnGranted(Context context, String[] permissions) {
         List<String> unGranted = new ArrayList<>();
         if (null != permissions && permissions.length > 0) {
             for (String permission : permissions) {
@@ -91,6 +81,10 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
             }
         }
         return unGranted.toArray(new String[unGranted.size()]);
+    }
+
+    public String[] getUnGranted() {
+        return mUnGranted;
     }
 
     private boolean checkSelfPermission(Context context, String permission) {
@@ -109,7 +103,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
     }
 
     public void requestPermissions() {
-        if (isAllGranted(mActivity)) {
+        if (isAllGranted(getActivity())) {
             onChecked();
         } else if (shouldShowRationale()) {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
@@ -124,7 +118,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
      */
     private boolean shouldShowRationale() {
         for (String permission : mUnGranted) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, permission)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)) {
                 return true;
             }
         }
@@ -143,21 +137,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
      * 请求权限
      */
     public void doRequest() {
-        if (null != mFragment) {
-            mFragment.addPermissionGroup(this);
-            requestPermissionFromFragment();
-        } else {
-            ((PermissionProxyActivity) mActivity).addPermissionGroup(this);
-            requestPermissionFromActivity();
-        }
-    }
-
-    private void requestPermissionFromActivity() {
-        ActivityCompat.requestPermissions(mActivity, mUnGranted, getRequestCode());
-    }
-
-    private void requestPermissionFromFragment() {
-        mFragment.requestPermissions(mUnGranted, getRequestCode());
+        mPermissionProxy.requestPermissions(this);
     }
 
     int getRequestCode() {
