@@ -15,7 +15,7 @@ public class PermissionProxyActivity extends SampleActivityBase implements Permi
         return this;
     }
 
-    public void checkAndRequestPermissions(PermissionGroup group){
+    public void checkAndRequestPermissions(PermissionGroup group) {
         group.checkAndRequestPermissions(this);
     }
 

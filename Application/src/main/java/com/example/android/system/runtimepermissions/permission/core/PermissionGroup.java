@@ -29,11 +29,11 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
 
     private PermissionRationale mRationale;
 
-    protected PermissionGroup(){
+    public PermissionGroup(){
         refreshRequestCode();
     }
 
-    protected PermissionGroup(String... permissions) {
+    public PermissionGroup(String... permissions) {
         mPermissions = permissions;
         refreshRequestCode();
     }
@@ -73,7 +73,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
     /**
      * 获取未授权的权限
      */
-    public String[] getUnGranted(Context context, String[] permissions) {
+    private String[] getUnGranted(Context context, String[] permissions) {
         List<String> unGranted = new ArrayList<>();
         if (null != permissions && permissions.length > 0) {
             for (String permission : permissions) {
@@ -133,7 +133,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
         return this;
     }
 
-    public String[] getUnGranted() {
+    String[] getUnGranted() {
         return mUnGranted;
     }
 

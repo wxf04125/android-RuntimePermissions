@@ -9,7 +9,7 @@ public abstract class PermissionRationale {
 
     protected PermissionGroup mPermissionGroup;
 
-    public void setPermissionGroup(PermissionGroup permissionGroup){
+    public void setPermissionGroup(PermissionGroup permissionGroup) {
         mPermissionGroup = permissionGroup;
     }
 

@@ -5,7 +5,6 @@ import android.app.Activity;
 
 /**
  * Created by jimsmac on 16/4/23.
- *
  */
 public interface PermissionProxy {
 
