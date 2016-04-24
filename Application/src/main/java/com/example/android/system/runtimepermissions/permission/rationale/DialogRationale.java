@@ -24,7 +24,7 @@ public class DialogRationale extends PermissionRationale {
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mPermissionGroup.doRequest();
+                mPermissionGroup.requestPermissions();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);

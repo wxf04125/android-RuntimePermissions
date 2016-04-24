@@ -26,7 +26,7 @@ public class SnackBarRationale extends PermissionRationale {
                 setAction(android.R.string.ok, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mPermissionGroup.doRequest();
+                        mPermissionGroup.requestPermissions();
                     }
                 }).show();
     }

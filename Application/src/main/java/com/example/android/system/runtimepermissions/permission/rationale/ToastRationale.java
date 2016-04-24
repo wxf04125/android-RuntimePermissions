@@ -24,7 +24,7 @@ public class ToastRationale extends PermissionRationale {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mPermissionGroup.doRequest();
+                mPermissionGroup.requestPermissions();
             }
         }, 1000);
 

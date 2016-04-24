@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * isAllGranted --> shouldShowRationale --> showRationale --> doRequest --> verify
+ * isAllGranted --> shouldShowRationale --> showRationale --> requestPermissions --> verify
  */
 public abstract class PermissionGroup implements PermissionGrantCallback {
 
@@ -58,7 +58,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
             // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
             showRationale(activity);
         } else {
-            doRequest();
+            requestPermissions();
         }
     }
 
@@ -114,7 +114,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
 
     private void showRationale(Activity activity) {
         if (null == mRationale) {
-            doRequest();
+            requestPermissions();
         } else {
             mRationale.showRationale(activity);
         }
@@ -123,7 +123,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
     /**
      * 请求权限
      */
-    public void doRequest() {
+    public void requestPermissions() {
         mPermissionProxy.requestPermissions(this);
     }
 
