@@ -15,10 +15,14 @@ public class PermissionProxyActivity extends SampleActivityBase implements Permi
         return this;
     }
 
+    public void checkAndRequestPermissions(PermissionGroup group){
+        group.checkAndRequestPermissions(this);
+    }
+
     @Override
     public void requestPermissions(PermissionGroup group) {
         mContainer.addPermissions(group);
-        ActivityCompat.requestPermissions(this, group.getUnGranted(), group.getRequestCode());
+        ActivityCompat.requestPermissions(getActivity(), group.getUnGranted(), group.getRequestCode());
     }
 
     @Override

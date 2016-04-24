@@ -7,6 +7,11 @@ public class PermissionProxyFragment extends Fragment implements PermissionProxy
 
     private PermissionGroupContainer mContainer = new PermissionGroupContainer();
 
+    public void checkAndRequestPermissions(PermissionGroup group){
+        group.checkAndRequestPermissions(this);
+    }
+
+    @Override
     public void requestPermissions(PermissionGroup group) {
         mContainer.addPermissions(group);
         requestPermissions(group.getUnGranted(), group.getRequestCode());

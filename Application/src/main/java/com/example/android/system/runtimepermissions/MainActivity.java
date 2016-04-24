@@ -111,7 +111,8 @@ public class MainActivity extends PermissionProxyActivity {
     private View mLayout;
 
     public void showCamera(View view) {
-        new PermissionGroup(this, Manifest.permission.CAMERA) {
+
+        checkAndRequestPermissions(new PermissionGroup(Manifest.permission.CAMERA) {
             @Override
             public void onChecked() {
                 showCameraPreview();
@@ -127,7 +128,7 @@ public class MainActivity extends PermissionProxyActivity {
                             }
                         }).show();
             }
-        }.setupRationale(new DialogRationale(R.string.permission_camera_rationale)).requestPermissions();
+        }.setupRationale(new DialogRationale(R.string.permission_camera_rationale)));
     }
 
     /**
@@ -192,7 +193,7 @@ public class MainActivity extends PermissionProxyActivity {
     }
 
     public void showContacts(View v) {
-        new ContactGroup(this) {
+        checkAndRequestPermissions(new ContactGroup() {
             @Override
             public void onChecked() {
                 showContactDetails();
@@ -217,7 +218,7 @@ public class MainActivity extends PermissionProxyActivity {
                 Log.i(TAG, "Contacts permissions were NOT granted.");
                 Snackbar.make(mLayout, R.string.permissions_not_granted, Snackbar.LENGTH_SHORT).show();
             }
-        }.setupRationale(new SnackBarRationale(R.id.sample_main_layout, R.string.permission_contacts_rationale)).requestPermissions();
+        }.setupRationale(new SnackBarRationale(R.id.sample_main_layout, R.string.permission_contacts_rationale)));
     }
 
 

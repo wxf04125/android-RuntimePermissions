@@ -13,10 +13,6 @@ public abstract class PermissionRationale {
         mPermissionGroup = permissionGroup;
     }
 
-    protected Activity getActivity(){
-        return mPermissionGroup.getActivity();
-    }
-
-    public abstract void showRationale();
+    public abstract void showRationale(Activity activity);
 
 }

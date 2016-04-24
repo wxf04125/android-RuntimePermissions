@@ -1,5 +1,6 @@
 package com.example.android.system.runtimepermissions.permission.rationale;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
@@ -17,8 +18,8 @@ public class DialogRationale extends PermissionRationale {
     }
 
     @Override
-    public void showRationale() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    public void showRationale(Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(mStringId);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

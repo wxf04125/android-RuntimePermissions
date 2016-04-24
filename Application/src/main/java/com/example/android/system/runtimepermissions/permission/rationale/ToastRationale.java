@@ -1,5 +1,6 @@
 package com.example.android.system.runtimepermissions.permission.rationale;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
@@ -18,8 +19,8 @@ public class ToastRationale extends PermissionRationale {
     }
 
     @Override
-    public void showRationale() {
-        Toast.makeText(getActivity(), mStringId, Toast.LENGTH_LONG).show();
+    public void showRationale(Activity activity) {
+        Toast.makeText(activity, mStringId, Toast.LENGTH_LONG).show();
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {

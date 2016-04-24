@@ -29,18 +29,13 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
 
     private PermissionRationale mRationale;
 
-    protected PermissionGroup(PermissionProxy proxy) {
-        mPermissionProxy = proxy;
+    protected PermissionGroup(){
         refreshRequestCode();
     }
 
-    protected PermissionGroup(PermissionProxy proxy, String... permissions) {
-        this(proxy);
+    protected PermissionGroup(String... permissions) {
         mPermissions = permissions;
-    }
-
-    public Activity getActivity(){
-        return mPermissionProxy.getActivity();
+        refreshRequestCode();
     }
 
     /**
@@ -54,10 +49,17 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
         mRequestCode = sBaseCode++;
     }
 
-    public PermissionGroup setupRationale(PermissionRationale rationale) {
-        mRationale = rationale;
-        mRationale.setPermissionGroup(this);
-        return this;
+    public void checkAndRequestPermissions(PermissionProxy proxy) {
+        mPermissionProxy = proxy;
+        Activity activity = proxy.getActivity();
+        if (isAllGranted(activity)) {
+            onChecked();
+        } else if (shouldShowRationale(activity)) {
+            // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
+            showRationale(activity);
+        } else {
+            doRequest();
+        }
     }
 
     /**
@@ -83,10 +85,6 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
         return unGranted.toArray(new String[unGranted.size()]);
     }
 
-    public String[] getUnGranted() {
-        return mUnGranted;
-    }
-
     private boolean checkSelfPermission(Context context, String permission) {
         return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
@@ -102,34 +100,23 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
         onGranted();
     }
 
-    public void requestPermissions() {
-        if (isAllGranted(getActivity())) {
-            onChecked();
-        } else if (shouldShowRationale()) {
-            // 重写该方法时，在适当时候调用doRequest方法，进行权限请求，否则永远不会请求
-            showRationale();
-        } else {
-            doRequest();
-        }
-    }
-
     /**
      * 是否需要显示原因，方便用户理解为什么需要这些权限
      */
-    private boolean shouldShowRationale() {
+    private boolean shouldShowRationale(Activity activity) {
         for (String permission : mUnGranted) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
                 return true;
             }
         }
         return false;
     }
 
-    private void showRationale() {
+    private void showRationale(Activity activity) {
         if (null == mRationale) {
             doRequest();
         } else {
-            mRationale.showRationale();
+            mRationale.showRationale(activity);
         }
     }
 
@@ -140,15 +127,18 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
         mPermissionProxy.requestPermissions(this);
     }
 
-    int getRequestCode() {
-        return mRequestCode;
+    public PermissionGroup setupRationale(PermissionRationale rationale) {
+        mRationale = rationale;
+        mRationale.setPermissionGroup(this);
+        return this;
     }
 
-    /**
-     * 处理用户拒绝授权的情况,默认不处理
-     */
-    public void onDenied() {
+    public String[] getUnGranted() {
+        return mUnGranted;
+    }
 
+    int getRequestCode() {
+        return mRequestCode;
     }
 
     /**
@@ -170,6 +160,13 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
             }
         }
         return true;
+    }
+
+    /**
+     * 处理用户拒绝授权的情况,默认不处理
+     */
+    public void onDenied() {
+
     }
 
 }
