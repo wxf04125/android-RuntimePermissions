@@ -43,6 +43,6 @@
             android:layout_height="wrap_content"
             android:text="@string/show_contacts"
             android:id="@+id/button_contacts"
-            android:onClick="showContacts"/>
+            android:onClick="showContactDetails"/>
 
 </LinearLayout>

@@ -18,7 +18,7 @@ public class PermissionGroupContainer {
         }
     }
 
-    public void checkAndRemovePermissions(int requestCode, @NonNull int[] grantResults) {
+    public void verifyPermissions(int requestCode, @NonNull int[] grantResults) {
         if (null != mPermissionGroups && mPermissionGroups.size() > 0) {
             for (PermissionGroup permissionGroup : mPermissionGroups) {
                 if (permissionGroup.getRequestCode() == requestCode) {

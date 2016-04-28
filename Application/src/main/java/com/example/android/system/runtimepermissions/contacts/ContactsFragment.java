@@ -16,9 +16,7 @@
 
 package com.example.android.system.runtimepermissions.contacts;
 
-import com.example.android.common.logger.Log;
-import com.example.android.system.runtimepermissions.R;
-
+import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.OperationApplicationException;
@@ -27,7 +25,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -36,6 +33,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.example.android.common.logger.Log;
+import com.example.android.system.runtimepermissions.R;
+import com.example.android.system.runtimepermissions.permission.core.PermissionGroup;
+import com.example.android.system.runtimepermissions.permission.core.PermissionProxyFragment;
 
 import java.util.ArrayList;
 
@@ -51,7 +53,7 @@ import java.util.ArrayList;
  * implementation is based on the training guide available here:
  * https://developer.android.com/training/contacts-provider/retrieve-names.html
  */
-public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ContactsFragment extends PermissionProxyFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = "Contacts";
     private TextView mMessageText = null;
@@ -99,7 +101,12 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadContact();
+                checkPermissions(new PermissionGroup(Manifest.permission.READ_CONTACTS) {
+                    @Override
+                    public void onGranted() {
+                        loadContact();
+                    }
+                });
             }
         });
         return rootView;

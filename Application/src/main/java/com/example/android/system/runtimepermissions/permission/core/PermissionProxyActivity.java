@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 
+import com.example.android.common.logger.Log;
+
 import common.activities.SampleActivityBase;
 
 public class PermissionProxyActivity extends SampleActivityBase implements PermissionProxy {
@@ -15,7 +17,7 @@ public class PermissionProxyActivity extends SampleActivityBase implements Permi
         return this;
     }
 
-    public void checkAndRequestPermissions(PermissionGroup group) {
+    public void checkPermissions(PermissionGroup group) {
         group.checkAndRequestPermissions(this);
     }
 
@@ -27,6 +29,8 @@ public class PermissionProxyActivity extends SampleActivityBase implements Permi
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mContainer.checkAndRemovePermissions(requestCode, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d("PermissionProxyActivity", "onRequestPermissionsResult");
+        mContainer.verifyPermissions(requestCode, grantResults);
     }
 }
