@@ -49,7 +49,7 @@ public abstract class PermissionGroup implements PermissionGrantCallback {
         mRequestCode = sBaseCode++;
     }
 
-    public void checkAndRequestPermissions(PermissionProxy proxy) {
+    public void checkPermissions(PermissionProxy proxy) {
         mPermissionProxy = proxy;
         Activity activity = proxy.getActivity();
         if (isAllGranted(activity)) {
